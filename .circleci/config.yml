@@ -11,6 +11,7 @@ jobs:
           - v1-dependencies-
 
       - run: docker-compose up --build -d
+      - run: docker exec circleci-exercise sudo chown circleci:circleci /srv
       - run: docker exec circleci-exercise make
       - save_cache:
           paths:
