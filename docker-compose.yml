@@ -4,7 +4,7 @@ services:
     container_name: circleci-exercise
     build: .
     volumes:
-      - $PWD:/srv/
+      - $PWD:/srv
     tty: true
     command: bash
     working_dir: /srv
