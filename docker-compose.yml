@@ -1,0 +1,10 @@
+version: '2'
+services:
+  app:
+    container_name: circleci-exercise
+    build: .
+    volumes:
+      - $PWD:/srv/
+    tty: true
+    command: bash
+    working_dir: /srv
