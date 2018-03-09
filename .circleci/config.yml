@@ -4,17 +4,38 @@ jobs:
     machine: true
     steps:
       - checkout
+
+      - restore_cache:
+          key: docker-{{ checksum ".circleci/config.yml" }}-{{ checksum "docker-compose.yml" }}-{{ checksum "Dockerfile" }}
+          paths: ~/caches/images.tar
+
+      - run: |
+            if [ ! -f ~/caches/images.tar ]; then
+              docker-compose build
+              mkdir -p ~/caches
+              docker save $(docker images | awk 'NR>=2 && ! /^<none>/{print $1}') -o ~/caches/images.tar
+            fi
+
+      - save_cache:
+          key: docker-{{ checksum ".circleci/config.yml" }}-{{ checksum "docker-compose.yml" }}-{{ checksum "Dockerfile" }}
+          paths: ~/caches/images.tar
+
+      - run: docker load -i ~/caches/images.tar
+
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "composer.json" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: docker-compose up --build -d
+      - run: docker-compose up -d
+      - run: docker ps
       - run: docker exec circleci-exercise sudo chown -R circleci:circleci /srv
-      - run: docker exec circleci-exercise make
+      - run: docker exec --user circleci circleci-exercise make
+
       - save_cache:
           paths:
             - ./vendor
           key: v1-dependencies-{{ checksum "composer.json" }}
-      - run: docker exec circleci-exercise make test
+
+      - run: docker exec --user circleci circleci-exercise make test
