@@ -5,6 +5,5 @@ services:
     build: .
     volumes:
       - $PWD:/srv
-    tty: true
-    command: bash
     working_dir: /srv
+    tty: true
